@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import vertexShader from './shaders/vertex.glsl';
 import fragmentShader from './shaders/fragment.glsl';
 
@@ -12,6 +13,7 @@ class App {
   private startTime: number;
   private clickTime: number;
   private clickPosition: THREE.Vector2;
+  private controls: OrbitControls;
 
   private camConfig = {
     fov: 75,
@@ -62,6 +64,8 @@ class App {
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.mesh);
     this.camera.position.z = 1.5;
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.startTime = Date.now();
     this.clickTime = -1;

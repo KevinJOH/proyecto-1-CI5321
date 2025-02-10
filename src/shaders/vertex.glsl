@@ -17,9 +17,10 @@ void main() {
     if (t <= 1.0) {
       vec2 clickPos = (u_clickPosition * 2.0 - 1.0) * vec2(projectionMatrix[0][0], projectionMatrix[1][1]);
       float distance = length(pos.xy - clickPos);
-      float wave = sin(50.0 * distance - 5.0 * t) * exp(-5.0 * distance);
-      if (distance < 0.3) { 
-        pos.z += wave * 0.5;
+      //float wave = sin(50.0 * distance - 5.0 * t) * exp(-5.0 * distance);
+      if (distance < 0.3) { // Asegurándonos de que la deformación se aplique sólo dentro de un radio específico
+        float wave = sin(10.0 * distance - 5.0 * t) * exp(-3.0 * distance);
+        pos.z += wave * 2.0; // Aumentando la magnitud de la deformación para que sea más visible
       }
     }
   }
