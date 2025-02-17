@@ -1,161 +1,57 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import jellyMaterial from '../materials/jellyMaterial';
+import blinnPhongMaterial from '../materials/blinnPhongMaterial';
+import creativeMaterial from '../materials/creativeMaterial';
+import { enableClickInteraction } from './components/controls';
 
-import vertexShader from './shaders/vertex.glsl';
-import fragmentShader from './shaders/fragment.glsl';
+// Creamos la escena, cámara y renderizador 
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75, window.innerWidth / window.innerHeight, 0.1, 1000
+);
+camera.position.z = 5;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-class App {
-  private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
-  private renderer: THREE.WebGLRenderer;
-  private geometry: THREE.BoxGeometry; // Importante: BoxGeometry
-  private material: THREE.RawShaderMaterial;
-  private mesh: THREE.Mesh;
-  private startTime: number;
-  private clickTime: number;
-  private clickPosition: THREE.Vector2; // Vector3 para la posición 3D
-  private elasticity: number;
-  
-  private camConfig = {
-    fov: 75,
-    aspect: window.innerWidth / window.innerHeight,
-    near: 0.1,
-    far: 1000,
-  };
+// Agregamos controles de órbita para poder mover la cámara
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
-  private texture: any;
+// Creamos un cubo y le asignamos un material básico (MeshBasicMaterial)
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xC0C0C0 }); // Plateado básico
 
-  constructor() {
-    // Create scene
-    this.scene = new THREE.Scene();
+// Creamos un array con los materiales que usaremos:
+const materials = [basicMaterial, blinnPhongMaterial, jellyMaterial, creativeMaterial];
+let currentMaterialIndex = 0;
 
-    // Setup camera
-    this.camera = new THREE.PerspectiveCamera(
-      this.camConfig.fov,
-      this.camConfig.aspect,
-      this.camConfig.near,
-      this.camConfig.far
-    );
+// Creamos la malla usando el material básico inicialmente
+const mesh = new THREE.Mesh(geometry, materials[currentMaterialIndex]);
+scene.add(mesh);
 
-    // Setup renderer
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      powerPreference: 'high-performance',
-    });
-    if (!this.renderer.capabilities.isWebGL2) {
-      console.warn('WebGL 2.0 is not available on this browser.');
-    }
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    const canvas = document.body.appendChild(this.renderer.domElement);
-
-    const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
-
-    // Create shader material
-    this.geometry = new THREE.BoxGeometry(6, 6, 6);
-    this.elasticity = 0.0; // Inicializa la elasticidad
-
-    this.material = new THREE.RawShaderMaterial({
-      vertexShader,
-      fragmentShader,
-
-      transparent: true,
-      uniforms: {
-        projectionMatrix: { value: this.camera.projectionMatrix },
-        viewMatrix: { value: this.camera.matrixWorldInverse },
-        modelMatrix: { value: new THREE.Matrix4() },
-        // custom uniforms
-        u_time: { value: 0.0 },
-        u_resolution: { value: resolution },
-        u_elasticity: { value: this.elasticity },
-        u_texture: { value: this.texture },
-        u_clickTime: { value: -1.0 },
-        u_clickPosition: { value: new THREE.Vector3(-1.0, -1.0, -1.0) },
-      },
-      glslVersion: THREE.GLSL3,
-      side: THREE.DoubleSide,
-    });
-
-    // Create mesh: Water
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.mesh.rotation.y = Math.PI / 5;
-    this.mesh.rotation.x = Math.PI / 6;
-    this.scene.add(this.mesh);
-    this.camera.position.z = 8;
-
-    const controls = new OrbitControls(this.camera, canvas);
-    controls.enableDamping = true;
-
-    // Initialize
-    this.startTime = Date.now();
-    this.clickTime = -1;
-    this.clickPosition = new THREE.Vector2(-1.0, -1.0);
-    this.onWindowResize();
-
-    // Bind methods
-    this.onWindowResize = this.onWindowResize.bind(this);
-    this.animate = this.animate.bind(this);
-    this.onDocumentClick = this.onDocumentClick.bind(this);
-
-    // Add event listeners
-    window.addEventListener('resize', this.onWindowResize);
-    window.addEventListener('click', this.onDocumentClick);
-
-    // Start the main loop
-    this.animate();
+// Listener para detectar la tecla espacio y cambiar de material
+window.addEventListener('keydown', (event: KeyboardEvent) => {
+  if (event.code === 'Space') {
+    // Avanzamos en el array de materiales
+    currentMaterialIndex = (currentMaterialIndex + 1) % materials.length;
+    mesh.material = materials[currentMaterialIndex];
+    console.log("Material actual:", currentMaterialIndex);
   }
+});
 
-  private animate(): void {
-    requestAnimationFrame(this.animate);
-    const elapsedTime = (Date.now() - this.startTime) / 1000;
-    this.material.uniforms.u_time.value = elapsedTime;
-  
-    // Actualiza las matrices en cada frame
-    this.material.uniforms.projectionMatrix.value = this.camera.projectionMatrix;
-    this.material.uniforms.viewMatrix.value = this.camera.matrixWorldInverse;
-    this.material.uniforms.modelMatrix.value = this.mesh.matrixWorld; // Importante: usa la matriz del objeto
-    
-    // Amortiguación
-    if (this.elasticity > 0.0) {
-      this.elasticity -= 0.02 * this.elasticity;
-      this.material.uniforms.u_elasticity.value = this.elasticity;
-    }
-    this.renderer.render(this.scene, this.camera);
-  }
-  
-
-  private onWindowResize(): void {
-    this.camera.aspect = this.camConfig.aspect;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.material.uniforms.u_resolution.value.set(window.innerWidth, window.innerHeight);
-  }
-
-  private onDocumentClick(event: MouseEvent): void {
-    this.clickTime = (Date.now() - this.startTime) / 1000;
-    this.clickPosition.set(event.clientX / window.innerWidth, 1.0 - event.clientY / window.innerHeight);
-    this.material.uniforms.u_clickTime.value = this.clickTime;
-    this.material.uniforms.u_clickPosition.value.copy(this.clickPosition);
-  
-    const mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, this.camera);
-
-    const intersects = raycaster.intersectObjects(this.scene.children, true);
-
-    if (intersects.length > 0) {
-        const intersectionPoint = intersects[0].point;
-        this.material.uniforms.u_clickPosition.value = intersectionPoint; // Usa Vector3
-        this.material.uniforms.u_clickTime.value = this.clickTime;
-
-        this.elasticity = 0.5; // Activa la elasticidad
-        this.material.uniforms.u_elasticity.value = this.elasticity; // Actualiza el uniforme
-    } else {
-        this.material.uniforms.u_clickTime.value = -1;
-    }
+// Función de animación: rota el cubo y actualiza la escena
+function animate(time: number) {
+  requestAnimationFrame(animate);
+  mesh.rotation.y += 0.01;
+  controls.update();
+  renderer.render(scene, camera);
+  if (currentMaterialIndex === 2) {
+    jellyMaterial.uniforms.u_time.value = performance.now() / 1000;
+    jellyMaterial.uniforms.u_time.value += 0.01;
   }
 }
 
-const myApp = new App();
+enableClickInteraction(scene, camera, renderer, blinnPhongMaterial, jellyMaterial);
+animate(0);
