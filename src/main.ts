@@ -44,7 +44,7 @@ window.addEventListener('keydown', (event: KeyboardEvent) => {
 // Función de animación: rota el cubo y actualiza la escena
 function animate(time: number) {
   requestAnimationFrame(animate);
-  mesh.rotation.y += 0.01;
+  mesh.rotation.y += 0.005;
   controls.update();
   renderer.render(scene, camera);
   if (currentMaterialIndex === 2) {
@@ -52,7 +52,12 @@ function animate(time: number) {
     jellyMaterial.uniforms.u_time.value += 0.01;
     renderer.render(scene, camera);
   }
+  if (currentMaterialIndex === 3) {
+    creativeMaterial.uniforms.u_time.value = performance.now() / 1000;
+    creativeMaterial.uniforms.u_time.value += 0.01;
+    renderer.render(scene, camera);
+  }
 }
 
-enableClickInteraction(scene, camera, renderer, blinnPhongMaterial, jellyMaterial);
+enableClickInteraction(scene, camera, renderer, blinnPhongMaterial, jellyMaterial, creativeMaterial);
 animate(0);

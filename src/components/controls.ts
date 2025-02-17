@@ -6,17 +6,28 @@ import * as THREE from 'three';
  * @param camera La cámara de Three.js.
  * @param renderer El renderizador de Three.js.
  * @param blinnPhongMaterial El material Blinn-Phong con la luz a modificar.
+ * @param creativeMaterial El material creative con la luz a modificar.
  */
 export function enableClickInteraction(
   scene: THREE.Scene,
   camera: THREE.Camera,
   renderer: THREE.Renderer,
   blinnPhongMaterial: THREE.RawShaderMaterial,
-  jellyMaterial: THREE.RawShaderMaterial
+  jellyMaterial: THREE.RawShaderMaterial,
+  creativeMaterial: THREE.RawShaderMaterial
   
 ) {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
+  const geometries = [
+    new THREE.DodecahedronGeometry(1),
+    new THREE.SphereGeometry(1, 32, 32),
+    new THREE.TorusGeometry(1, 0.4, 16, 100),
+    new THREE.CylinderGeometry(1, 1, 2, 32),
+    new THREE.ConeGeometry(1, 2, 32),
+    new THREE.TetrahedronGeometry(1),
+    new THREE.BoxGeometry(1, 1, 1)
+  ];
 
   function handleCubeClick(event: MouseEvent) {
     // Convertir las coordenadas del mouse a espacio de NDC (-1 a 1)
@@ -30,12 +41,26 @@ export function enableClickInteraction(
     const intersects = raycaster.intersectObjects(scene.children);
 
     for (const intersect of intersects) {
+      const mesh = intersect.object as THREE.Mesh;
       if ((intersect.object as THREE.Mesh).material === blinnPhongMaterial) {
-        // Generar un color aleatorio para la luz
         const newColor = new THREE.Color(Math.random(), Math.random(), Math.random());
         blinnPhongMaterial.uniforms.u_lightColor.value = newColor;
         console.log(`Nuevo color de luz: ${newColor.getHexString()}`);
-        break; // Salimos después de cambiar el color
+        break;
+      }
+      if (mesh.material === creativeMaterial) {
+        // Cambiar color de la luz
+        const newColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+        creativeMaterial.uniforms.u_lightColor.value = newColor;
+        console.log(`Nuevo color de luz: ${newColor.getHexString()}`);
+
+        // Cambiar geometría
+        const currentGeometryIndex = geometries.findIndex(geometry => geometry.uuid === mesh.geometry.uuid);
+        const nextGeometryIndex = (currentGeometryIndex + 1) % geometries.length;
+        mesh.geometry.dispose(); // Liberar memoria de la geometría anterior
+        mesh.geometry = geometries[nextGeometryIndex];
+        
+        break; // Detener la iteración después de encontrar un objeto
       }
     }
   }

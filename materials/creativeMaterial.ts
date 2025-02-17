@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import vertexShader from './shaders/creative/vertex.glsl';
 import fragmentShader from './shaders/creative/fragment.glsl';
-import blinnPhongMaterial from './blinnPhongMaterial';
 
 const creativeMaterial = new THREE.RawShaderMaterial({
   vertexShader,
@@ -24,8 +23,8 @@ const creativeMaterial = new THREE.RawShaderMaterial({
 export default creativeMaterial;
 
 export function handleCubeClick(intersectedObject: { material: THREE.RawShaderMaterial; }) {
-  if (intersectedObject.material === blinnPhongMaterial) {
+  if (intersectedObject.material === creativeMaterial) {
     const newColor = new THREE.Color(Math.random(), Math.random(), Math.random());
-    blinnPhongMaterial.uniforms.u_lightColor.value = newColor;
+    creativeMaterial.uniforms.u_lightColor.value = newColor;
   }
 }
