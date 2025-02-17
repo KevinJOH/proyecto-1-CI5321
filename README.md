@@ -17,3 +17,7 @@ This playground was developed using the following tech stack:
 2. Install a compatible Node.js version (I guess any v20.10+ should suffice)
 3. Run `npm install` to install the dependencies
 4. Run `npm run dev` to run the Three.js project, usually on port 5173
+
+## How to interact with the project
+- Space key to change material (from Basic Material to Blinn Phong ...).
+- Click to interact with the material (Change color, generate waves ...).
