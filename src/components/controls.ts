@@ -2,11 +2,11 @@ import * as THREE from 'three';
 
 /**
  * Agrega interacción de clic a un objeto en la escena para cambiar el color de la luz.
- * @param scene La escena de Three.js.
- * @param camera La cámara de Three.js.
- * @param renderer El renderizador de Three.js.
- * @param blinnPhongMaterial El material Blinn-Phong con la luz a modificar.
- * @param creativeMaterial El material creative con la luz a modificar.
+ * @param scene
+ * @param camera
+ * @param renderer
+ * @param blinnPhongMaterial
+ * @param creativeMaterial
  */
 export function enableClickInteraction(
   scene: THREE.Scene,
@@ -30,14 +30,14 @@ export function enableClickInteraction(
   ];
 
   function handleCubeClick(event: MouseEvent) {
-    // Convertir las coordenadas del mouse a espacio de NDC (-1 a 1)
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Actualizar el raycaster con la posición del mouse
+
     raycaster.setFromCamera(mouse, camera);
 
-    // Obtener los objetos intersectados
+
     const intersects = raycaster.intersectObjects(scene.children);
 
     for (const intersect of intersects) {
@@ -49,18 +49,18 @@ export function enableClickInteraction(
         break;
       }
       if (mesh.material === creativeMaterial) {
-        // Cambiar color de la luz
+
         const newColor = new THREE.Color(Math.random(), Math.random(), Math.random());
         creativeMaterial.uniforms.u_lightColor.value = newColor;
         console.log(`Nuevo color de luz: ${newColor.getHexString()}`);
 
-        // Cambiar geometría
+
         const currentGeometryIndex = geometries.findIndex(geometry => geometry.uuid === mesh.geometry.uuid);
         const nextGeometryIndex = (currentGeometryIndex + 1) % geometries.length;
         mesh.geometry.dispose(); // Liberar memoria de la geometría anterior
         mesh.geometry = geometries[nextGeometryIndex];
         
-        break; // Detener la iteración después de encontrar un objeto
+        break;
       }
     }
   }

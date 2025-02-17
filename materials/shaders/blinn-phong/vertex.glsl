@@ -14,9 +14,9 @@ out vec3 vPosition;
 out vec2 vUv;
 
 void main() {
-  vUv = uv;  // Pasamos las coordenadas UV al fragment shader
-  vNormal = normalize(mat3(modelMatrix) * normal); // Normal en espacio de mundo
-  vPosition = (modelMatrix * vec4(position, 1.0)).xyz; // Posición en espacio de mundo
+  vUv = uv;
+  vNormal = normalize(mat3(modelMatrix) * normal);
+  vPosition = (modelMatrix * vec4(position, 1.0)).xyz;
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }

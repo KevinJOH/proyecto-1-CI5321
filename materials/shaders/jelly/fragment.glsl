@@ -13,8 +13,6 @@ void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
   vec3 color = vec3(0.082, 0.576, 0.788);
 
-
-  // Efecto visual de la onda
   if (u_clickTime >= 0.0) {
     float t = u_time - u_clickTime;
     if (t <= 2.0) {

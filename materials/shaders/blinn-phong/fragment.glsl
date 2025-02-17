@@ -19,14 +19,11 @@ void main() {
   vec3 V = normalize(u_cameraPosition - vPosition);
   vec3 H = normalize(L + V);
 
-  // Componente ambiental
   vec3 ambient = 0.25 * u_materialColor;
 
-  // Componente difusa
   float diff = max(dot(N, L), 0.0);
   vec3 diffuse = diff * u_lightColor * u_materialColor;
-
-  // Componente especular
+  
   float spec = pow(max(dot(N, H), 0.0), u_shininess);
   vec3 specular = spec * u_specularColor;
 
