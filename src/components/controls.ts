@@ -37,17 +37,29 @@ export function enableClickInteraction(
         console.log(`Nuevo color de luz: ${newColor.getHexString()}`);
         break; // Salimos después de cambiar el color
       }
-      if ((intersect.object as THREE.Mesh).material === jellyMaterial) {
-        // Guardar el tiempo y posición del clic en los uniforms del shader
-        jellyMaterial.uniforms.u_clickTime.value = performance.now() / 1000;
-        jellyMaterial.uniforms.u_clickPosition.value.set(mouse.x, mouse.y);
-        console.log(`Gelatina impactada en NDC: (${mouse.x}, ${mouse.y})`); 
-        break;
-      }
     }
-
   }
-
-  // Agregar el evento de clic al renderer
+  class ClickInteractionHandler {
+    private clickTime: number;
+    private clickPosition: THREE.Vector2;
+    private startTime: number;
+    private material: THREE.RawShaderMaterial;
+  
+    constructor(material: THREE.RawShaderMaterial) {
+      this.clickTime = 0;
+      this.clickPosition = new THREE.Vector2();
+      this.startTime = Date.now();
+      this.material = material;
+    }
+    public onDocumentClick(event: MouseEvent): void {
+      this.clickTime = (Date.now() - this.startTime) / 1000;
+      this.clickPosition.set(event.clientX / window.innerWidth, 1.0 - event.clientY / window.innerHeight);
+      console.log(`Gelatina impactada: (${mouse.x}, ${mouse.y})`); 
+      this.material.uniforms.u_clickTime.value = this.clickTime;
+      this.material.uniforms.u_clickPosition.value.copy(this.clickPosition);
+    }
+  }
+  const clickHandler = new ClickInteractionHandler(jellyMaterial);
+  document.addEventListener('click', (event) => clickHandler.onDocumentClick(event));  // Agregar el evento de clic al renderer
   renderer.domElement.addEventListener('click', handleCubeClick);
 }

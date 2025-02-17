@@ -20,7 +20,7 @@ void main() {
   vec3 H = normalize(L + V);
 
   // Componente ambiental
-  vec3 ambient = 0.1 * u_materialColor;
+  vec3 ambient = 0.25 * u_materialColor;
 
   // Componente difusa
   float diff = max(dot(N, L), 0.0);
@@ -30,5 +30,5 @@ void main() {
   float spec = pow(max(dot(N, H), 0.0), u_shininess);
   vec3 specular = spec * u_specularColor;
 
-  fragColor = vec4(ambient + diffuse + specular, 1.0);
+  fragColor = vec4(ambient + diffuse + specular, 1);
 }

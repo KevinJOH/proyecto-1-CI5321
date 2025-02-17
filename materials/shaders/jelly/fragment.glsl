@@ -11,16 +11,16 @@ out vec4 fragColor;
 
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution;
-  vec3 color = vec3(0.5, 0.5, 0.5); // Color base azul
+  vec3 color = vec3(0.082, 0.576, 0.788);
 
 
   // Efecto visual de la onda
   if (u_clickTime >= 0.0) {
     float t = u_time - u_clickTime;
-    if (t >= 0.0 && t <= 1.5) {
+    if (t <= 2.0) {
       float distance = length(uv - u_clickPosition);
-      float wave = sin(40.0 * distance - 2.0 * t) * exp(-2.0 * distance) * exp(-3.0 * t);
-      color += vec3(0.3 * wave, 0.1 * wave, -0.1 * wave); 
+      float wave = sin(60.0 * distance - 5.0 * t) * exp(-5.0 * distance);
+      color += vec3(0.2 * wave); 
     }
   }
 

@@ -50,6 +50,7 @@ function animate(time: number) {
   if (currentMaterialIndex === 2) {
     jellyMaterial.uniforms.u_time.value = performance.now() / 1000;
     jellyMaterial.uniforms.u_time.value += 0.01;
+    renderer.render(scene, camera);
   }
 }
 
